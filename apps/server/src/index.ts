@@ -6,6 +6,7 @@ import taskRoutes from "./routes/tasks.routes";
 import userRoutes from "./routes/tasks.routes";
 import http from "http";
 import { Server } from "socket.io";
+import analyticsRoutes from "./routes/analytics.routes";
 
 dotenv.config();
 
@@ -44,6 +45,9 @@ app.set("io", io);
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin-analytics", analyticsRoutes);
+
+
 
 // ✅ Use server.listen
 const PORT = process.env.PORT || 4000;

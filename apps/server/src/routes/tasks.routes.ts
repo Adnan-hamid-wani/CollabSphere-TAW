@@ -7,9 +7,10 @@ import {
   rejectTask,
   getAllColumnsWithTasks,
   markAsCompleted,
+  getAllTaskActivityLogs
 } from "../controllers/task.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { isAdmin } from "../middlewares/isAdmin.middlwware"; // import the isAdmin middlee";
+import { isAdmin } from "../middlewares/isAdmin.middleware"; // import the isAdmin middlee";
 
 import { RequestHandler } from "express";
 import { PrismaClient } from "@prisma/client";
@@ -61,4 +62,12 @@ router.get("/", async (_req, res) => {
     res.status(500).json({ message: "Failed to fetch users" });
   }
 });
+
+router.get("/activity/logs", (req, res, next) => {
+  Promise.resolve(getAllTaskActivityLogs(req, res)).catch(next);
+});
+
+
+
+
 export default router;

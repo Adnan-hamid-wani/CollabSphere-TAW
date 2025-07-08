@@ -52,7 +52,10 @@ export default function NotificationBell() {
                       Dismiss
                     </button>
                   </li>
+                  
                 ))}
+                <div className="text-xs text-gray-500">
+              </div>
               </ul>
             )}
           </div>

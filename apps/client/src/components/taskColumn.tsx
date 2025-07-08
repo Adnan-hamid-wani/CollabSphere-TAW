@@ -20,6 +20,7 @@ const TaskColumn = ({ title, tasks, onEdit }: Props) => {
   task={task}
   onEdit={() => onEdit(task)}
 />      ))}
+
     </div>
   );
 };

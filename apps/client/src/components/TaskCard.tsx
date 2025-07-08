@@ -34,6 +34,7 @@ const [showFeedback, setShowFeedback] = useState(false);
         icon: '✅',
       });
     } catch (err) {
+      console.error("Error marking task complete:", err);
       toast.error("Failed to submit task for approval.");
     } finally {
       setIsCompleting(false);
@@ -45,6 +46,7 @@ const [showFeedback, setShowFeedback] = useState(false);
       try {
         await API.delete(`/tasks/${task.id}`);
         await fetchTasks();
+        toast.warning("Task deleted.");
       } catch (err) {
         console.error("Error deleting task:", err);
         toast.error("Failed to delete task.");
@@ -159,6 +161,7 @@ const [showFeedback, setShowFeedback] = useState(false);
     )}
   </>
 )}
+
     </div>
   );
 };

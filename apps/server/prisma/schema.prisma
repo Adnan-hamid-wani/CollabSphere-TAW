@@ -8,30 +8,51 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  username      String
-  password      String
-  role          Role     @default(USER)
-  createdAt     DateTime @default(now())
-  createdTasks  Task[]   @relation("CreatedTasks")
-  assignedTasks Task[]   @relation("AssignedTasks")
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  createdTasks  Task[] @relation("CreatedTasks")
+  assignedTasks Task[] @relation("AssignedTasks")
+
+  // 👇 Back-relation for TaskActivity (actor)
+  taskActivities TaskActivity[] @relation("ActorActivities")
 }
 
 model Task {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?
-  status       String   @default("TODO") // "TODO" | "PENDING" | "COMPLETED"
-  feedback     String?                    // For rejected tasks
-  assignedTo   String
-  assignedUser User     @relation("AssignedTasks", fields: [assignedTo], references: [id])
-  createdBy    String
-  creator      User     @relation("CreatedTasks", fields: [createdBy], references: [id])
-  createdAt    DateTime @default(now())
-  submittedForReview Boolean @default(false) // 🆕 new flag
-  submittedAt         DateTime? // 🆕
-  approvedAt          DateTime? // 🆕
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  status      String  @default("TODO")
+  feedback    String?
+  assignedTo  String
+  createdBy   String
+
+  assignedUser User @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  creator      User @relation("CreatedTasks", fields: [createdBy], references: [id])
+
+  createdAt          DateTime  @default(now())
+  submittedForReview Boolean   @default(false)
+  submittedAt        DateTime?
+  approvedAt         DateTime?
+
+  // 👇 Back-relation for TaskActivity (task)
+  activities TaskActivity[] @relation("TaskActivities")
+}
+
+model TaskActivity {
+  id        String   @id @default(uuid())
+  taskId    String
+  actorId   String
+  action    String // e.g. "CREATED", "UPDATED", "COMPLETED"
+  message   String // e.g. "Task X approved by Admin"
+  createdAt DateTime @default(now())
+
+  task  Task @relation("TaskActivities", fields: [taskId], references: [id], onDelete: Cascade)
+  actor User @relation("ActorActivities", fields: [actorId], references: [id])
 }
 
 enum Role {
