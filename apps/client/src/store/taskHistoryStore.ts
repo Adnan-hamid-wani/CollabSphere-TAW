@@ -1,7 +1,7 @@
 // src/store/activityLogStore.ts
 import { create } from 'zustand';
 import API from '../utils/api';
-import socket from '../utils/socket';
+import { getSocket } from "../utils/socket";
 
 type ActivityLog = {
   id: string;
