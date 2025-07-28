@@ -10,13 +10,22 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ChatContainer from "./components/ChatApp/ChatContainer";
+import { initializeSocket } from "./utils/socket"; // ✅ Import this
+
 
 const App = () => {
   const loadAuthFromStorage = useAuthStore((s) => s.loadAuthFromStorage);
+    const user = useAuthStore((s) => s.user); // ✅ Get user from store
+
 
   useEffect(() => {
     loadAuthFromStorage();
   }, []);
+  useEffect(() => {
+    if (user?.id && user?.role) {
+      initializeSocket(); // ✅ Only connect when user is ready
+    }
+  }, [user]);
 
   return (
     <BrowserRouter>
