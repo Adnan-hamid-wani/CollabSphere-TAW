@@ -12,6 +12,7 @@ import {
   Bar,
   ResponsiveContainer,
   Legend,
+  TooltipProps,
 } from "recharts";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
@@ -20,12 +21,28 @@ import Navbar from "../components/Navbar";
 
 const COLORS = ["blue", "green", "red"];
 
+
 function AdminAnalytics() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [average, setAverage] = useState<number | null>(null);
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+  if (active && payload && payload.length) {
+    const userData = payload[0].payload;
+    return (
+      <div className="bg-white p-3 border shadow-md rounded-md">
+        <p className="font-semibold">{label}</p>
+        <p className="text-green-600">✅ Completed: {userData.completed}</p>
+        <p className="text-yellow-600">🕓 Pending: {userData.pending}</p>
+        <p className="text-red-500">❌ Rejected: {userData.rejected}</p>
+        <p className="font-bold mt-2">📦 Total: {userData.total}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
   // 🔒 Role check
   useEffect(() => {
@@ -60,15 +77,15 @@ function AdminAnalytics() {
   }));
 
   return (
-    <div className="p-6 space-y-10 min-h-screen bg-gradient-to-br from-blue-100 to-white">
+    <div className=" space-y-10 min-h-screen bg-gradient-to-br from-blue-100 to-white">
   
   <Navbar/>
-  <h1 className="text-4xl font-extrabold text-gray-800 drop-shadow-lg mb-6">
+  <h1 className=" text-4xl font-extrabold text-gray-800 drop-shadow-lg mb-6">
     📊 Admin Task Analytics
   </h1>
 
   {/* 📊 Graphs side by side */}
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-4">
     {/* 📅 Task Trends */}
     <div className="bg-white/30 backdrop-blur-lg border border-white/30 rounded-2xl p-4 shadow-xl">
       <h2 className="text-lg font-semibold text-gray-700 mb-2">📅 Task Trends</h2>
@@ -129,12 +146,17 @@ function AdminAnalytics() {
         🏆 User-wise Completion
       </h2>
       <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={data.performance}>
-          <XAxis dataKey="username" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="completed" fill="violet" />
-        </BarChart>
+       <BarChart data={data.performance}>
+  <XAxis dataKey="username" />
+    <YAxis allowDecimals={false} />
+  <Tooltip content={<CustomTooltip />} />
+  <Legend />
+  <Bar dataKey="completed" stackId="a" fill="#4ade80" name="Completed" />
+  <Bar dataKey="pending" stackId="a" fill="#facc15" name="Pending" />
+  <Bar dataKey="rejected" stackId="a" fill="#f87171" name="Rejected" />
+</BarChart>
+
+
       </ResponsiveContainer>
     </div>
     <div className="bg-white/30 backdrop-blur-lg border border-white/30 rounded-xl p-5 shadow-lg text-center ">
@@ -150,7 +172,7 @@ function AdminAnalytics() {
  
 
   {/* 📦 Summary Cards */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
     {[
       { label: "📌 Total Tasks", value: data.totalTasks, color: "text-blue-600" },
       { label: "✅ Completion Rate", value: `${data.completionRate}%`, color: "text-green-600" },

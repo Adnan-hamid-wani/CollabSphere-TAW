@@ -8,7 +8,10 @@ type ActivityLog = {
   action: string;
   message: string;
   createdAt: string;
-  actor: { username: string };
+  actor: {   
+    id: string;
+    username: string
+   };
   task: { title: string };
 };
 

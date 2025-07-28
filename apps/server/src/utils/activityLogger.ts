@@ -16,23 +16,19 @@ export const logActivity = async (
       message,
     },
     include: {
-      actor: { select: { username: true } },
-      task: { select: { title: true, assignedTo: true } }, // 💡 include assigned user
+      actor: { select: { id: true, username: true } }, // ✅ add `id` here
+      task: { select: { title: true, assignedTo: true } },
     },
   });
 
   if (io) {
     const assignedUserId = activity.task.assignedTo;
 
-    // 👇 Emit to the user assigned to the task
     if (assignedUserId && assignedUserId !== actorId) {
       io.to(assignedUserId).emit("activity-log", activity);
     }
 
-    // 👇 Emit to the actor (admin or user)
     io.to(actorId).emit("activity-log", activity);
-
-    // 👇 Emit to all admins
     io.to("admin").emit("activity-log", activity);
   }
 

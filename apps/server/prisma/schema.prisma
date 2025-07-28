@@ -7,20 +7,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
+model Message {
+  id          String   @id @default(uuid())
+  content     String?  // optional, in case it's just an image/doc
+  type        MessageType @default(TEXT)
 
-  createdTasks  Task[] @relation("CreatedTasks")
-  assignedTasks Task[] @relation("AssignedTasks")
+  fileUrl     String?   // for image/pdf/document
+  fileName    String?   // original name
+  fileType    String?   // MIME type: image/png, application/pdf, etc.
 
-  // 👇 Back-relation for TaskActivity (actor)
-  taskActivities TaskActivity[] @relation("ActorActivities")
+  createdAt   DateTime @default(now())
+  
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  status      MessageStatus @default(SENT) // 👈 new field
+
 }
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+}
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  username          String
+  password          String
+  role              Role     @default(USER)
+  createdAt         DateTime @default(now())
+
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+
+  createdTasks      Task[]   @relation("CreatedTasks")
+  assignedTasks     Task[]   @relation("AssignedTasks")
+  taskActivities    TaskActivity[] @relation("ActorActivities")
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+}
+
 
 model Task {
   id          String  @id @default(cuid())
@@ -30,6 +67,8 @@ model Task {
   feedback    String?
   assignedTo  String
   createdBy   String
+  priority    String  @default("MEDIUM") // <-- Add this line
+
 
   assignedUser User @relation("AssignedTasks", fields: [assignedTo], references: [id])
   creator      User @relation("CreatedTasks", fields: [createdBy], references: [id])
@@ -38,6 +77,8 @@ model Task {
   submittedForReview Boolean   @default(false)
   submittedAt        DateTime?
   approvedAt         DateTime?
+  attachmentUrl String?     // <-- New: file path or S3 URL
+
 
   // 👇 Back-relation for TaskActivity (task)
   activities TaskActivity[] @relation("TaskActivities")

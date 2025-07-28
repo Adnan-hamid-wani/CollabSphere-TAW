@@ -8,6 +8,12 @@ export interface TaskState {
   addTask: (task: TaskType) => void;
   deleteTask: (taskId: string) => void;
   updateTask: (updatedTask: TaskType) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+   statusFilter: string;
+  assigneeFilter: string;
+  setStatusFilter: (status: string) => void;
+  setAssigneeFilter: (assignee: string) => void;
   // ...other methods
 };
 function taskExists(tasks: TaskType[], id: string) {
@@ -22,6 +28,12 @@ export const useTaskStore = create<TaskState>((set) => ({
     const res = await API.get('/tasks/columns');
     set({ columns: res.data });
   },
+  searchQuery: "",
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  statusFilter: '',
+  assigneeFilter: '',
+  setStatusFilter: (status) => set({ statusFilter: status }),
+  setAssigneeFilter: (assignee) => set({ assigneeFilter: assignee }),
 
   addTask: (task: TaskType) =>
   set((state) => {

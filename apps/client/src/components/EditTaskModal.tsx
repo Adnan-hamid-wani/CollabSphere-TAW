@@ -15,10 +15,14 @@ export const EditTaskModal = ({
 }) => {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
-  const { fetchTasks } = useTaskStore();
+ const [priority, setPriority] = useState<TaskType['priority']>(task.priority || "MEDIUM");
+   const { fetchTasks } = useTaskStore();
 
   useEffect(() => {
     if (isOpen) {
+       setTitle(task.title);
+      setDescription(task.description);
+      setPriority(task.priority || "MEDIUM");
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -27,11 +31,11 @@ export const EditTaskModal = ({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen ,task]);
 
   const handleUpdate = async () => {
     try {
-      await API.put(`/tasks/${task.id}`, { title, description });
+      await API.put(`/tasks/${task.id}`, { title, description, priority });
       close();
       fetchTasks();
     } catch (err) {
@@ -72,6 +76,15 @@ export const EditTaskModal = ({
           className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 bg-white/70 resize-none"
           rows={4}
         />
+      <select
+  value={priority}
+          onChange={(e) => setPriority(e.target.value as TaskType['priority'])}
+  className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg bg-white/70 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+>
+  <option value="LOW">Low Priority</option>
+  <option value="MEDIUM">Medium Priority</option>
+  <option value="HIGH">High Priority</option>
+</select>
 
         {/* Action buttons */}
         <div className="flex justify-end gap-3">

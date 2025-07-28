@@ -40,20 +40,45 @@ export const getTaskAnalytics = async (req: Request, res: Response) => {
     }));
 
     // 🔵 Performance per user
-    const performance = await prisma.task.groupBy({
-      by: ['assignedTo'],
-      where: { status: 'COMPLETED' },
-      _count: true,
-    });
+    // 🔵 Performance per user: completed, pending, rejected
+const users = await prisma.user.findMany({ select: { id: true, username: true } });
 
-    const users = await prisma.user.findMany({ select: { id: true, username: true } });
-    const performanceWithNames = performance.map((p) => {
-      const user = users.find((u) => u.id === p.assignedTo);
-      return {
-        username: user?.username || 'Unknown',
-        completed: p._count,
-      };
-    });
+const tasks = await prisma.task.findMany({
+  select: {
+    assignedTo: true,
+    status: true,
+  },
+});
+
+const userTaskMap: Record<
+  string,
+  { completed: number; pending: number; rejected: number }
+> = {};
+
+users.forEach((user) => {
+  userTaskMap[user.id] = { completed: 0, pending: 0, rejected: 0 };
+});
+
+tasks.forEach((task) => {
+  if (!task.assignedTo) return;
+
+  const entry = userTaskMap[task.assignedTo];
+  if (!entry) return;
+
+  if (task.status === "COMPLETED") entry.completed++;
+  else if (task.status === "PENDING") entry.pending++;
+  else if (task.status === "REJECTED") entry.rejected++;
+});
+
+const performanceWithNames = users.map((user) => {
+  const userData = userTaskMap[user.id] || { completed: 0, pending: 0, rejected: 0 };
+  return {
+    username: user.username,
+    ...userData,
+    total: userData.completed + userData.pending + userData.rejected,
+  };
+});
+
 
     // 🟣 Average Completion Time
     const completedActivities = await prisma.taskActivity.findMany({

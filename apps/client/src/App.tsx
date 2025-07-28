@@ -7,6 +7,9 @@ import { useAuthStore } from "./store/authStore";
 import PrivateRoute from "./components/PrivateRoute";
 import { Toaster } from "sonner";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import ChatContainer from "./components/ChatApp/ChatContainer";
 
 const App = () => {
   const loadAuthFromStorage = useAuthStore((s) => s.loadAuthFromStorage);
@@ -17,7 +20,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-right" className="no-dark-mode"/>
 
       <Routes>
         <Route
@@ -53,6 +56,18 @@ const App = () => {
             </div>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route
+          path="*"
+          element={
+            <div className="flex items-center justify-center h-screen">
+              <h1 className="text-4xl font-bold">404 - Page Not Found</h1>
+            </div>
+          }
+        />
+        <Route path="/messages/text" element={<ChatContainer />} />
+
         
       </Routes>
     </BrowserRouter>

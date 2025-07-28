@@ -7,6 +7,13 @@ import userRoutes from "./routes/tasks.routes";
 import http from "http";
 import { Server } from "socket.io";
 import analyticsRoutes from "./routes/analytics.routes";
+import fileRoutes from "./routes/file.routes";
+import path from "path";
+import aiRoutes from "./routes/ai.routes"; // ✅ Import AI routes
+import messageRoutes from "./routes/message.routes"; // ✅ Import message routes
+import emailRoutes from "./routes/email.routes"; // ✅ Import email routes
+
+
 
 dotenv.config();
 
@@ -22,12 +29,17 @@ app.use(express.json());
 
 const server = http.createServer(app);
 
+
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
     credentials: true,
   },
 });
+
+
+
+
 
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
@@ -46,7 +58,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin-analytics", analyticsRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/api/files", fileRoutes); // ✅ Must add this
+app.use("/api/ai", aiRoutes); // ✅ AI routes
+app.use("/api/email", emailRoutes);
 
+app.use("/api/messages", messageRoutes); // ✅ Clean and typed
 
 
 // ✅ Use server.listen

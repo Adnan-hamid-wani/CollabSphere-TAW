@@ -11,10 +11,9 @@ import {
 } from "../controllers/task.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { isAdmin } from "../middlewares/isAdmin.middleware"; // import the isAdmin middlee";
-
 import { RequestHandler } from "express";
 import { PrismaClient } from "@prisma/client";
-
+import { upload } from "../middlewares/upload.middleware";
 const prisma = new PrismaClient();
 const router = Router();
 
@@ -23,7 +22,7 @@ router.use((req, res, next) => {
   Promise.resolve(authenticate(req, res, next)).catch(next);
 });
 
-router.post("/", isAdmin as RequestHandler, (req, res, next) => {
+router.post("/", isAdmin as RequestHandler,upload.single("attachment"), (req, res, next) => {
   Promise.resolve(createTask(req, res)).catch(next);
 });
 
@@ -52,10 +51,12 @@ router.put("/:id/reject", isAdmin as RequestHandler, (req, res, next) => {
 router.get("/columns", (req, res, next) => {
   Promise.resolve(getAllColumnsWithTasks(req, res)).catch(next);
 });
+
+
 router.get("/", async (_req, res) => {
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, email: true }
+      select: { id: true, email: true , username: true }, 
     });
     res.json(users);
   } catch (error) {

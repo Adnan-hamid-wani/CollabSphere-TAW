@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 // 1️⃣ Admin creates and assigns a task
 export const createTask = async (req: AuthRequest, res: Response) => {
-  const { title, description, assignedToEmail } = req.body;
+  const { title, description, assignedToEmail ,priority= "MEDIUM" ,attachmentUrl: attachmentFromBody } = req.body;
 
   if (req.user?.role !== "ADMIN") {
     return res.status(403).json({ message: "Only admins can create tasks" });
@@ -25,6 +25,12 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 if (!user) {
   return res.status(404).json({ message: "Assigned user not found" });
 }
+  const file = req.file;
+
+ const finalAttachmentUrl = file
+    ? `/uploads/${file.filename}` // from multer
+    : attachmentFromBody?.trim() || null; 
+
 
 const task = await prisma.task.create({
   data: {
@@ -33,6 +39,10 @@ const task = await prisma.task.create({
     assignedTo: user.id,
     createdBy: req.user.id,
     status: "TODO",
+    priority, // Use the priority from the request body
+
+    attachmentUrl: finalAttachmentUrl,
+
   },
 });
 
@@ -60,7 +70,7 @@ io.to(task.assignedTo).emit("notification", {
 // 2️⃣ Admin can update a task
 export const updateTask = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { title, description } = req.body;
+  const { title, description, priority} = req.body;
 
   if (req.user?.role !== "ADMIN") {
     return res.status(403).json({ message: "Only admins can update tasks" });
@@ -71,6 +81,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     data: {
       title,
       description,
+      priority,
     },
   });
   await logActivity(
@@ -149,22 +160,28 @@ export const markAsCompleted = async (req: AuthRequest, res: Response) => {
  // Instead of updating status to "REJECTED", update only the flag
 const updated = await prisma.task.update({
   where: { id },
-  data: { submittedForReview: true }, 
-
-  
+  data: { submittedForReview: true ,
+    submittedAt: new Date(),
+  }, 
 });
+
+// Fetch the user to get the username
+const user = await prisma.user.findUnique({
+  where: { id: req.user?.id },
+});
+
 await logActivity(
   task.id,
   req.user.id,
   "MARKED_COMPLETED",
-  `Task "${task.title}" marked as completed by ${req.user.username}`,
+  `Task "${task.title}" marked as completed by ${user?.username}`,
     req.app.get('io') // <-- pass Socket.IO
 
 );
 
 const io = req.app.get("io");
-io.to("admin").emit("task-completed", task, ); // They review it
-io.to("admin").emit("notification", { message: `Task Completed by :${req.user.username}` });
+io.to("admin").emit("task-completed", task); // They review it
+io.to("admin").emit("notification", { message: `Task Completed by :${user?.username}` });
 
 
 

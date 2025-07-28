@@ -96,17 +96,10 @@ useEffect(() => {
 
 
   return (
-<div className="min-h-screen w-full bg-gradient-to-b from-blue-100 to-white p-6">
-  {/* Header */}
-  <Navbar/>
- 
- 
-
-  {/* Activity Panel */}
-  
-
-  {/* Create Task Modal */}
-
+<div className="min-h-screen w-full bg-gradient-to-b from-blue-100 to-white">
+    <Navbar />
+    
+   
   {/* Task Columns */}
   <div className="flex flex-col lg:flex-row gap-6">
     {columns.map((col) => (
