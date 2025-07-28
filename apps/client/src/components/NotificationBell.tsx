@@ -1,12 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import { useNotificationStore } from "../store/notificationStore";
-import { useState } from "react";
+import { useState , useEffect, useRef} from "react";
 import { Bell } from "lucide-react";
+
 
 export default function NotificationBell() {
   const { notifications, removeNotification, clearAll } = useNotificationStore();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+useEffect(() => {
+  const handleClickOutside = (e: MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+      setOpen(false);
+    }
+  };
+
+  if (open) {
+    document.addEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [open]);
 
   // 🔀 Get route from type
   const getRoute = (type: string) => {
@@ -21,7 +39,12 @@ export default function NotificationBell() {
   };
 
   return (
+     <div
+  ref={modalRef}
+>
+    
     <div className="ml-auto mr-20 relative">
+    
       <button
         onClick={() => setOpen(!open)}
         className="relative p-2 text-gray-600 hover:text-black transition"
@@ -80,7 +103,11 @@ export default function NotificationBell() {
             )}
           </div>
         </div>
+
       )}
+       
+</div>
+
     </div>
   );
 }

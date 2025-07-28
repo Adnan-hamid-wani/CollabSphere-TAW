@@ -18,6 +18,10 @@ export const EditTaskModal = ({
  const [priority, setPriority] = useState<TaskType['priority']>(task.priority || "MEDIUM");
    const { fetchTasks } = useTaskStore();
 
+
+
+
+
   useEffect(() => {
     if (isOpen) {
        setTitle(task.title);

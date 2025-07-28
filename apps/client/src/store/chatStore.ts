@@ -13,6 +13,7 @@ interface ChatStore {
   sendFile: (file: File) => Promise<void>;
 }
 
+
 export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   currentReceiver: null,

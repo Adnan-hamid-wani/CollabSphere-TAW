@@ -61,6 +61,7 @@ export default function MessageList() {
 
   return (
     <div className="p-4 space-y-2 overflow-y-auto h-full ">
+
       {filteredMessages.map((message, index) => {
         const isOwn = message.senderId === userId;
         const bubbleColor = isOwn

@@ -41,10 +41,11 @@ export default function ChatContainer() {
       <div className="w-1/4 border-r border-gray-200 bg-white overflow-y-auto">
         <UserList />
       </div>
-      <Navbar1 />
 
       {/* Chat Section */}
-      <div className="flex flex-col w-3/4 h-full">
+      <div className="flex flex-col w-3/4 h-full ">
+            <Navbar1 />
+
         {currentReceiver ? (
           <>
             <div className="flex-1 overflow-y-auto">
