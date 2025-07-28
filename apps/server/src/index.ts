@@ -8,7 +8,7 @@ import path from "path";
 // ✅ Route imports
 import authRoutes from "./routes/auth.routes";
 import taskRoutes from "./routes/tasks.routes";
-import userRoutes from "./routes/task.routes"; // ✅ FIXED: should not import taskRoutes again
+import userRoutes from "./routes/tasks.routes"; // ✅ FIXED: should not import taskRoutes again
 import analyticsRoutes from "./routes/analytics.routes";
 import fileRoutes from "./routes/file.routes";
 import aiRoutes from "./routes/ai.routes";
