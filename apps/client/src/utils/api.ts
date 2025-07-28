@@ -1,18 +1,16 @@
-//src/utils/api.ts
-
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:4000/api',
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   withCredentials: true,
   headers: {
-  'Content-Type': 'application/json',
-}
-
+    'Content-Type': 'application/json',
+  },
 });
 
 API.interceptors.request.use((config) => {
   const isAuthRoute = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+
   if (!isAuthRoute) {
     const auth = localStorage.getItem('auth');
     if (auth) {
@@ -20,8 +18,8 @@ API.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
+
   return config;
 });
-
 
 export default API;
