@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
+    "@adnanwani/universal-darkmode": "^1.1.1",
+
     "axios": "^1.10.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.344.0",
