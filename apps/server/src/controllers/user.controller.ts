@@ -8,7 +8,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
         id: true,
         email: true,
         username: true, // ✅ Make sure this is selected
-        avatar: true     // ✅ Optional if you're using avatars
       }
     });
 
