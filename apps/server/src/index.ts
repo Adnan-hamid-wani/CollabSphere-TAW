@@ -1,71 +1,85 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth.routes";
-import taskRoutes from "./routes/tasks.routes";
-import userRoutes from "./routes/tasks.routes";
 import http from "http";
 import { Server } from "socket.io";
+import path from "path";
+
+// ✅ Route imports
+import authRoutes from "./routes/auth.routes";
+import taskRoutes from "./routes/tasks.routes";
+import userRoutes from "./routes/task.routes"; // ✅ FIXED: should not import taskRoutes again
 import analyticsRoutes from "./routes/analytics.routes";
 import fileRoutes from "./routes/file.routes";
-import path from "path";
-import aiRoutes from "./routes/ai.routes"; // ✅ Import AI routes
-import messageRoutes from "./routes/message.routes"; // ✅ Import message routes
-import emailRoutes from "./routes/email.routes"; // ✅ Import email routes
+import aiRoutes from "./routes/ai.routes";
+import messageRoutes from "./routes/message.routes";
+import emailRoutes from "./routes/email.routes";
 
-
-
+// ✅ Load .env
 dotenv.config();
 
 const app = express();
 
-// ✅ CORS must come before any routes or sockets
-app.use(cors({
-  origin: "http://localhost:5173", // Your frontend origin
-  credentials: true,
-}));
+// ✅ Allow listed frontend origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://collab-sphere.vercel.app",
+  "https://collab-sphere-nfkmi58sv-adnan-hamid-wanis-projects.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("❌ Not allowed by CORS: " + origin));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
+// ✅ Create server
 const server = http.createServer(app);
 
-
+// ✅ Setup Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   },
 });
 
-
-
-
-
+// ✅ Socket.IO connection logic
 io.on("connection", (socket) => {
-  const userId = socket.handshake.query.userId;
-  const userRole = socket.handshake.query.role;
+  const userId = socket.handshake.query.userId as string;
+  const userRole = socket.handshake.query.role as string;
 
   if (userId) socket.join(userId);
   if (userRole === "ADMIN") socket.join("admin");
 
-  console.log(`🔌 Socket connected: ${userId} (${userRole})`);
+  console.log(`🔌 Socket connected: ${userId || "unknown"} (${userRole || "no-role"})`);
 });
 
+// ✅ Make io available in controllers
 app.set("io", io);
 
-// ✅ API routes must come after CORS and socket setup
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes); // ✅ FIXED: now actually user routes
 app.use("/api/admin-analytics", analyticsRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-app.use("/api/files", fileRoutes); // ✅ Must add this
-app.use("/api/ai", aiRoutes); // ✅ AI routes
+app.use("/api/files", fileRoutes);
+app.use("/api/ai", aiRoutes);
 app.use("/api/email", emailRoutes);
+app.use("/api/messages", messageRoutes);
 
-app.use("/api/messages", messageRoutes); // ✅ Clean and typed
+// ✅ Serve uploads
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-
-// ✅ Use server.listen
+// ✅ Start server
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
